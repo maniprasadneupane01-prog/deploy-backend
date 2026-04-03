@@ -18,22 +18,8 @@ const allowedOrigins = [
   'https://www.birajdental.com.np'
 ].filter(Boolean);
 
-app.use(cors({
-  origin: (origin, cb) => {
-    // Allow all origins in production (API is public anyway)
-    // Or match against allowed list
-    if (!origin) return cb(null, true); // server-to-server, mobile apps, etc.
-    if (allowedOrigins.includes(origin)) return cb(null, true);
-    // Allow Vercel preview deployments
-    if (origin.endsWith('.vercel.app')) return cb(null, true);
-    // Allow localhost variations
-    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) return cb(null, true);
-    // In development, allow everything
-    if (process.env.NODE_ENV !== 'production') return cb(null, true);
-    return cb(null, false);
-  },
-  credentials: true
-}));
+app.use(cors());
+app.options('*', cors());
 app.use(express.json({ limit: '10kb' }));
 app.use(require('./middleware/requestLogger'));
 
