@@ -3,16 +3,16 @@ const fs   = require('fs');
 const path = require('path');
 
 // Always use /tmp on Render (always writable, no disk needed)
-const DATA_DIR = '/tmp/biraj-data';
+// Fall back to local data dir for development
+const DATA_DIR = process.env.DATA_DIR || '/tmp/biraj-data';
 
 function initDB() {
-  try {
-    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-    ['appointments', 'contacts'].forEach(name => {
-      const fp = path.join(DATA_DIR, `${name}.json`);
-      if (!fs.existsSync(fp)) fs.writeFileSync(fp, '[]', 'utf8');
-    });
-  } catch (e) { /* ignore */ }
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  ['appointments', 'contacts'].forEach(name => {
+    const fp = path.join(DATA_DIR, `${name}.json`);
+    if (!fs.existsSync(fp)) fs.writeFileSync(fp, '[]', 'utf8');
+  });
+  console.log(`[DB] Initialized at ${DATA_DIR}`);
 }
 
 function readAll(collection) {

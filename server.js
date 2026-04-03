@@ -1,4 +1,15 @@
 'use strict';
+
+// Catch startup crashes so Render logs the real error
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL UNCAUGHT]', err.stack || err.message);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL REJECTION]', reason);
+});
+
 require('dotenv').config();
 const express  = require('express');
 const cors     = require('cors');
@@ -7,15 +18,12 @@ const path     = require('path');
 console.log('[BOOT] Starting Biraj Dental API...');
 console.log('[BOOT] NODE_ENV:', process.env.NODE_ENV || 'not set');
 console.log('[BOOT] PORT:', process.env.PORT || '5000');
+console.log('[BOOT] DATA_DIR:', process.env.DATA_DIR || '/tmp/biraj-data');
 
 const { initDB, readAll } = require('./utils/fileDB');
 
-try {
-  initDB();
-  console.log('[BOOT] Database initialized successfully');
-} catch (e) {
-  console.error('[BOOT] DB init error:', e.message);
-}
+initDB();
+console.log('[BOOT] Database initialized successfully');
 
 const app = express();
 
