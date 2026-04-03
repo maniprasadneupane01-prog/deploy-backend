@@ -3,17 +3,55 @@ const fs   = require('fs');
 const path = require('path');
 
 const DEFAULT_DATA_DIR = path.join(__dirname, '../data');
+const FALLBACK_DIR = '/tmp/biraj-data';
+
+function isDirWritable(dir) {
+  try {
+    fs.accessSync(dir, fs.constants.W_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function resolveDataDir() {
-  if (process.env.DATA_DIR) return path.resolve(process.env.DATA_DIR);
-  try {
-    fs.accessSync(DEFAULT_DATA_DIR, fs.constants.W_OK);
-    return DEFAULT_DATA_DIR;
-  } catch {
-    const fallback = '/tmp/biraj-data';
-    console.warn(`[DB] WARNING: ${DEFAULT_DATA_DIR} is not writable. Using fallback: ${fallback}`);
-    return fallback;
+  // 1. Try the configured DATA_DIR env var
+  if (process.env.DATA_DIR) {
+    const configured = path.resolve(process.env.DATA_DIR);
+    if (isDirWritable(configured)) return configured;
+    // Dir doesn't exist — try to create it
+    try {
+      fs.mkdirSync(configured, { recursive: true });
+      if (isDirWritable(configured)) {
+        console.log(`[DB] Created data directory at ${configured}`);
+        return configured;
+      }
+    } catch {
+      // Cannot create or not writable — fall through
+    }
+    console.warn(`[DB] WARNING: DATA_DIR=${configured} is not writable. Falling back.`);
   }
+
+  // 2. Try the repo's local data directory
+  if (isDirWritable(DEFAULT_DATA_DIR)) return DEFAULT_DATA_DIR;
+
+  // 3. Try /tmp (always writable on Render, but ephemeral)
+  try {
+    fs.mkdirSync(FALLBACK_DIR, { recursive: true });
+    if (isDirWritable(FALLBACK_DIR)) {
+      console.warn(`[DB] WARNING: Using /tmp/biraj-data (data resets on restart).`);
+      console.warn(`[DB] To persist data on Render, add a Persistent Disk and set DATA_DIR.`);
+      return FALLBACK_DIR;
+    }
+  } catch {
+    // fall through
+  }
+
+  // 4. Last resort — crash with clear message
+  console.error('[DB] FATAL: No writable data directory found.');
+  console.error('[DB] On Render: Dashboard → Your Service → Disks → Create Disk → Mount at /app/data');
+  console.error('[DB] Then set env var: DATA_DIR=/app/data');
+  process.exit(1);
 }
 
 const DATA_DIR = resolveDataDir();
@@ -25,7 +63,6 @@ function initDB() {
       console.log(`[DB] Created data directory at ${DATA_DIR}`);
     } catch (err) {
       console.error(`[DB] FATAL: Cannot create data directory at ${DATA_DIR}: ${err.message}`);
-      console.error('[DB] On Render, add a Persistent Disk at /app/data or set DATA_DIR env var.');
       process.exit(1);
     }
   }
