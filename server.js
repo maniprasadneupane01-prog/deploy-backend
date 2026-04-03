@@ -39,7 +39,7 @@ app.use('/api/contact',      require('./routes/contacts'));
 const FRONTEND_DIST = path.join(__dirname, '../frontend/dist');
 if (require('fs').existsSync(FRONTEND_DIST)) {
   app.use(express.static(FRONTEND_DIST));
-  app.get('*', (req, res, next) => {
+  app.get('{*path}', (req, res, next) => {
     if (!req.path.startsWith('/api')) {
       res.sendFile(path.join(FRONTEND_DIST, 'index.html'));
     } else {
