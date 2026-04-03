@@ -29,6 +29,19 @@ app.use(require('./middleware/requestLogger'));
 app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/contact',      require('./routes/contacts'));
 
+// Serve built frontend (if present)
+const FRONTEND_DIST = path.join(__dirname, '../frontend/dist');
+if (require('fs').existsSync(FRONTEND_DIST)) {
+  app.use(express.static(FRONTEND_DIST));
+  app.get('*', (req, res, next) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(FRONTEND_DIST, 'index.html'));
+    } else {
+      next();
+    }
+  });
+}
+
 app.get('/api/health', (req, res) => {
   const appts = readAll('appointments');
   res.json({
@@ -39,6 +52,20 @@ app.get('/api/health', (req, res) => {
       total:     appts.length,
       pending:   appts.filter(a => a.status === 'pending').length,
       confirmed: appts.filter(a => a.status === 'confirmed').length,
+    }
+  });
+});
+
+app.get('/', (req, res) => {
+  res.json({
+    name:    'Biraj Dental Hospital API',
+    version: '2.0',
+    docs:    'See /api/health for status',
+    endpoints: {
+      health:       'GET /api/health',
+      appointments: 'GET/POST /api/appointments',
+      slots:        'GET /api/appointments/slots?date=&branch=',
+      contact:      'POST /api/contact',
     }
   });
 });
