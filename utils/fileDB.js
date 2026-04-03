@@ -2,14 +2,32 @@
 const fs   = require('fs');
 const path = require('path');
 
-const DATA_DIR = process.env.DATA_DIR
-  ? path.resolve(process.env.DATA_DIR)
-  : path.join(__dirname, '../data');
+const DEFAULT_DATA_DIR = path.join(__dirname, '../data');
+
+function resolveDataDir() {
+  if (process.env.DATA_DIR) return path.resolve(process.env.DATA_DIR);
+  try {
+    fs.accessSync(DEFAULT_DATA_DIR, fs.constants.W_OK);
+    return DEFAULT_DATA_DIR;
+  } catch {
+    const fallback = '/tmp/biraj-data';
+    console.warn(`[DB] WARNING: ${DEFAULT_DATA_DIR} is not writable. Using fallback: ${fallback}`);
+    return fallback;
+  }
+}
+
+const DATA_DIR = resolveDataDir();
 
 function initDB() {
   if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-    console.log('[DB] Created data directory');
+    try {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+      console.log(`[DB] Created data directory at ${DATA_DIR}`);
+    } catch (err) {
+      console.error(`[DB] FATAL: Cannot create data directory at ${DATA_DIR}: ${err.message}`);
+      console.error('[DB] On Render, add a Persistent Disk at /app/data or set DATA_DIR env var.');
+      process.exit(1);
+    }
   }
   ['appointments', 'contacts'].forEach(name => {
     const fp = path.join(DATA_DIR, `${name}.json`);
