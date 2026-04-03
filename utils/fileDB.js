@@ -1,75 +1,67 @@
 'use strict';
-const fs = require('fs');
+const fs   = require('fs');
 const path = require('path');
 
-const inMemoryStore = {
-  appointments: [],
-  contacts: []
-};
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, '../data');
 
-let useKV = false;
-
-async function initDB() {
-  console.log('[DB] Initializing database...');
-  if (process.env.KV_URL) {
-    try {
-      const { kv } = require('@vercel/kv');
-      useKV = true;
-      console.log('[DB] Using Vercel KV Redis for data storage');
-    } catch (err) {
-      console.log('[DB] KV not available, using in-memory store');
-    }
-  } else {
-    console.log('[DB] Using in-memory store (no KV_URL set)');
+function initDB() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    console.log('[DB] Created data directory');
   }
+  ['appointments', 'contacts'].forEach(name => {
+    const fp = path.join(DATA_DIR, `${name}.json`);
+    if (!fs.existsSync(fp)) {
+      fs.writeFileSync(fp, JSON.stringify([], null, 2), 'utf8');
+      console.log(`[DB] Initialized ${name}.json`);
+    }
+  });
 }
 
-async function readAll(collection) {
+function readAll(collection) {
   try {
-    if (useKV) {
-      const { kv } = require('@vercel/kv');
-      const data = await kv.get(`biraj_${collection}`);
-      return data || [];
-    }
-    return inMemoryStore[collection] || [];
+    const fp  = path.join(DATA_DIR, `${collection}.json`);
+    const raw = fs.readFileSync(fp, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) throw new Error(`${collection}.json is not an array`);
+    return parsed;
   } catch (err) {
-    console.error(`[DB] readAll(${collection}) error:`, err.message);
-    return inMemoryStore[collection] || [];
+    throw new Error(`[DB] readAll(${collection}) failed: ${err.message}`);
   }
 }
 
-async function writeAll(collection, data) {
+function writeAll(collection, data) {
   try {
-    if (useKV) {
-      const { kv } = require('@vercel/kv');
-      await kv.set(`biraj_${collection}`, data);
-    }
-    inMemoryStore[collection] = data;
+    const fp   = path.join(DATA_DIR, `${collection}.json`);
+    const tmp  = fp + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
+    fs.renameSync(tmp, fp);
   } catch (err) {
-    console.error(`[DB] writeAll(${collection}) error:`, err.message);
-    inMemoryStore[collection] = data;
+    throw new Error(`[DB] writeAll(${collection}) failed: ${err.message}`);
   }
 }
 
-async function create(collection, record) {
-  const all = await readAll(collection);
+function create(collection, record) {
+  const all = readAll(collection);
   all.push(record);
-  await writeAll(collection, all);
+  writeAll(collection, all);
   return record;
 }
 
-async function findById(collection, id) {
-  const all = await readAll(collection);
+function findById(collection, id) {
+  const all = readAll(collection);
   return all.find(r => r.id === id) ?? null;
 }
 
-async function findMany(collection, filterFn = null) {
-  const all = await readAll(collection);
+function findMany(collection, filterFn = null) {
+  const all = readAll(collection);
   return filterFn ? all.filter(filterFn) : all;
 }
 
-async function updateById(collection, id, updates) {
-  const all = await readAll(collection);
+function updateById(collection, id, updates) {
+  const all = readAll(collection);
   const idx = all.findIndex(r => r.id === id);
   if (idx === -1) return null;
   all[idx] = {
@@ -77,21 +69,20 @@ async function updateById(collection, id, updates) {
     ...updates,
     updatedAt: new Date().toISOString()
   };
-  await writeAll(collection, all);
+  writeAll(collection, all);
   return all[idx];
 }
 
-async function deleteById(collection, id) {
-  const all = await readAll(collection);
+function deleteById(collection, id) {
+  const all      = readAll(collection);
   const filtered = all.filter(r => r.id !== id);
   if (filtered.length === all.length) return false;
-  await writeAll(collection, filtered);
+  writeAll(collection, filtered);
   return true;
 }
 
-async function count(collection, filterFn = null) {
-  const results = await findMany(collection, filterFn);
-  return results.length;
+function count(collection, filterFn = null) {
+  return findMany(collection, filterFn).length;
 }
 
 module.exports = {

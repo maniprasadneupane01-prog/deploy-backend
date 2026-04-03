@@ -1,7 +1,11 @@
 'use strict';
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+const express  = require('express');
+const cors     = require('cors');
+const path     = require('path');
+const { initDB, readAll } = require('./utils/fileDB');
+
+initDB();
 
 const app = express();
 
@@ -14,62 +18,48 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (process.env.NODE_ENV === 'development') return cb(null, true);
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
     return cb(null, false);
   },
   credentials: true
 }));
-
 app.use(express.json({ limit: '10kb' }));
-
-app.use(async (req, res, next) => {
-  try {
-    next();
-  } catch (err) {
-    console.error('[ERROR]', err.message);
-    res.status(500).json({
-      success: false,
-      error: 'INTERNAL_ERROR',
-      message: 'An unexpected error occurred. Please try again.'
-    });
-  }
-});
+app.use(require('./middleware/requestLogger'));
 
 app.use('/api/appointments', require('./routes/appointments'));
-app.use('/api/contact', require('./routes/contacts'));
+app.use('/api/contact',      require('./routes/contacts'));
 
-app.get('/api/health', async (req, res) => {
-  try {
-    const { readAll } = require('./utils/fileDB');
-    const appts = await readAll('appointments');
-    res.json({
-      status: 'ok',
-      version: '2.0',
-      timestamp: new Date().toISOString(),
-      stats: {
-        total: appts.length,
-        pending: appts.filter(a => a.status === 'pending').length,
-        confirmed: appts.filter(a => a.status === 'confirmed').length,
-      }
-    });
-  } catch (err) {
-    console.error('[HEALTH ERROR]', err.message);
-    res.json({
-      status: 'ok',
-      version: '2.0',
-      timestamp: new Date().toISOString(),
-      stats: { total: 0, pending: 0, confirmed: 0 }
-    });
-  }
+app.get('/api/health', (req, res) => {
+  const appts = readAll('appointments');
+  res.json({
+    status:   'ok',
+    version:  '2.0',
+    timestamp: new Date().toISOString(),
+    stats: {
+      total:     appts.length,
+      pending:   appts.filter(a => a.status === 'pending').length,
+      confirmed: appts.filter(a => a.status === 'confirmed').length,
+    }
+  });
 });
 
-app.get('/', (req, res) => {
-  res.json({ status: 'ok', message: 'Biraj Dental API is running' });
+app.use((err, req, res, _next) => {
+  console.error('[ERROR]', err.message);
+  res.status(500).json({
+    success: false,
+    error:   'INTERNAL_ERROR',
+    message: process.env.NODE_ENV === 'production'
+      ? 'An unexpected error occurred. Please try again.'
+      : err.message
+  });
 });
 
 app.use((req, res) => {
   res.status(404).json({ success: false, error: 'NOT_FOUND', message: `Route ${req.method} ${req.path} not found.` });
 });
 
-module.exports = app;
+const PORT = parseInt(process.env.PORT || '5000', 10);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Biraj Dental API running on http://0.0.0.0:${PORT}`);
+  console.log(`Health: http://0.0.0.0:${PORT}/api/health`);
+});

@@ -3,7 +3,7 @@ const { generateId }   = require('../utils/idGenerator');
 const { getSlotStatus } = require('../utils/slotManager');
 const { VALID_STATUSES } = require('../middleware/validate');
 
-exports.create = async (req, res, next) => {
+exports.create = (req, res, next) => {
   try {
     const record = {
       id:        generateId('BDC'),
@@ -25,28 +25,28 @@ exports.create = async (req, res, next) => {
         notes:     req.body.appointment.notes?.trim() || null,
       }
     };
-    const saved = await create('appointments', record);
+    const saved = create('appointments', record);
     res.status(201).json({ success: true, data: saved });
   } catch (err) { next(err); }
 };
 
-exports.getAll = async (req, res, next) => {
+exports.getAll = (req, res, next) => {
   try {
-    const data = await readAll('appointments');
+    const data = readAll('appointments');
     data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     res.json({ success: true, data, total: data.length });
   } catch (err) { next(err); }
 };
 
-exports.getById = async (req, res, next) => {
+exports.getById = (req, res, next) => {
   try {
-    const record = await findById('appointments', req.params.id);
+    const record = findById('appointments', req.params.id);
     if (!record) return res.status(404).json({ success: false, error: 'NOT_FOUND', message: `Appointment ${req.params.id} not found.` });
     res.json({ success: true, data: record });
   } catch (err) { next(err); }
 };
 
-exports.update = async (req, res, next) => {
+exports.update = (req, res, next) => {
   try {
     const { status, patient, appointment } = req.body;
     const updates = {};
@@ -58,26 +58,26 @@ exports.update = async (req, res, next) => {
     if (patient)     updates.patient     = patient;
     if (appointment) updates.appointment = appointment;
 
-    const updated = await updateById('appointments', req.params.id, updates);
+    const updated = updateById('appointments', req.params.id, updates);
     if (!updated) return res.status(404).json({ success: false, error: 'NOT_FOUND', message: `Appointment ${req.params.id} not found.` });
     res.json({ success: true, data: updated });
   } catch (err) { next(err); }
 };
 
-exports.remove = async (req, res, next) => {
+exports.remove = (req, res, next) => {
   try {
-    const deleted = await deleteById('appointments', req.params.id);
+    const deleted = deleteById('appointments', req.params.id);
     if (!deleted) return res.status(404).json({ success: false, error: 'NOT_FOUND', message: `Appointment ${req.params.id} not found.` });
     res.json({ success: true, message: `Appointment ${req.params.id} permanently deleted.` });
   } catch (err) { next(err); }
 };
 
-exports.getSlots = async (req, res, next) => {
+exports.getSlots = (req, res, next) => {
   try {
     const { date, branch } = req.query;
     if (!date || !branch)
       return res.status(400).json({ success: false, error: 'MISSING_PARAMS', message: 'Both date and branch query params are required.' });
-    const result = await getSlotStatus(date, branch);
+    const result = getSlotStatus(date, branch);
     res.json({ success: true, ...result });
   } catch (err) { next(err); }
 };
