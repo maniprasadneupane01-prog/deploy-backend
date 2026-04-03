@@ -6,12 +6,39 @@ const path = require('path');
 // Fall back to local data dir for development
 const DATA_DIR = process.env.DATA_DIR || '/tmp/biraj-data';
 
+function generateId(prefix = 'BDC') {
+  const now  = new Date();
+  const y    = now.getFullYear();
+  const m    = String(now.getMonth() + 1).padStart(2, '0');
+  const d    = String(now.getDate()).padStart(2, '0');
+  const rand = String(Math.floor(1000 + Math.random() * 9000));
+  return `${prefix}-${y}${m}${d}-${rand}`;
+}
+
 function initDB() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   ['appointments', 'contacts'].forEach(name => {
     const fp = path.join(DATA_DIR, `${name}.json`);
     if (!fs.existsSync(fp)) fs.writeFileSync(fp, '[]', 'utf8');
   });
+
+  // Auto-migrate: assign IDs to any records missing them
+  ['appointments', 'contacts'].forEach(name => {
+    const fp = path.join(DATA_DIR, `${name}.json`);
+    const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
+    let changed = false;
+    data.forEach(r => {
+      if (!r.id) {
+        r.id = generateId(name === 'appointments' ? 'BDC' : 'CTC');
+        changed = true;
+      }
+    });
+    if (changed) {
+      fs.writeFileSync(fp, JSON.stringify(data, null, 2), 'utf8');
+      console.log(`[DB] Migrated ${name}: assigned IDs to ${data.filter(r => r.id.startsWith(name === 'appointments' ? 'BDC' : 'CTC')).length} records`);
+    }
+  });
+
   console.log(`[DB] Initialized at ${DATA_DIR}`);
 }
 
