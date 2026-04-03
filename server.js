@@ -3,9 +3,19 @@ require('dotenv').config();
 const express  = require('express');
 const cors     = require('cors');
 const path     = require('path');
+
+console.log('[BOOT] Starting Biraj Dental API...');
+console.log('[BOOT] NODE_ENV:', process.env.NODE_ENV || 'not set');
+console.log('[BOOT] PORT:', process.env.PORT || '5000');
+
 const { initDB, readAll } = require('./utils/fileDB');
 
-initDB();
+try {
+  initDB();
+  console.log('[BOOT] Database initialized successfully');
+} catch (e) {
+  console.error('[BOOT] DB init error:', e.message);
+}
 
 const app = express();
 
