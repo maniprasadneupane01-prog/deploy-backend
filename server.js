@@ -9,15 +9,6 @@ initDB();
 
 const app = express();
 
-const allowedOrigins = [
-  process.env.ALLOWED_ORIGIN,
-  'http://localhost:5173',
-  'http://localhost:4173',
-  'http://127.0.0.1:5173',
-  'https://birajdental.com.np',
-  'https://www.birajdental.com.np'
-].filter(Boolean);
-
 app.use(cors());
 app.options('*', cors());
 app.use(express.json({ limit: '10kb' }));
