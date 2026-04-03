@@ -2,53 +2,16 @@
 const fs   = require('fs');
 const path = require('path');
 
-function isDirWritable(dir) {
-  try {
-    fs.accessSync(dir, fs.constants.W_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function resolveDataDir() {
-  // 1. Try repo's local data directory (works locally and on most hosts)
-  const localDir = path.join(__dirname, '../data');
-  if (isDirWritable(localDir)) return localDir;
-
-  // 2. Try creating it
-  try {
-    fs.mkdirSync(localDir, { recursive: true });
-    if (isDirWritable(localDir)) return localDir;
-  } catch { /* fall through */ }
-
-  // 3. Try /tmp (always writable on Render, but ephemeral)
-  const tmpDir = '/tmp/biraj-data';
-  try {
-    fs.mkdirSync(tmpDir, { recursive: true });
-    if (isDirWritable(tmpDir)) {
-      console.log('[DB] Using /tmp/biraj-data (data resets on restart)');
-      return tmpDir;
-    }
-  } catch { /* fall through */ }
-
-  // 4. Last resort
-  console.error('[DB] FATAL: No writable data directory found.');
-  process.exit(1);
-}
-
-const DATA_DIR = resolveDataDir();
-console.log(`[DB] Data directory: ${DATA_DIR}`);
+// Use /tmp on Render (ephemeral but always writable)
+// Use local data/ directory when running locally
+const DATA_DIR = process.env.NODE_ENV === 'production'
+  ? '/tmp/biraj-data'
+  : path.join(__dirname, '../data');
 
 function initDB() {
   if (!fs.existsSync(DATA_DIR)) {
-    try {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-      console.log(`[DB] Created data directory at ${DATA_DIR}`);
-    } catch (err) {
-      console.error(`[DB] FATAL: Cannot create data directory at ${DATA_DIR}: ${err.message}`);
-      process.exit(1);
-    }
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    console.log(`[DB] Created data directory at ${DATA_DIR}`);
   }
   ['appointments', 'contacts'].forEach(name => {
     const fp = path.join(DATA_DIR, `${name}.json`);
@@ -60,26 +23,18 @@ function initDB() {
 }
 
 function readAll(collection) {
-  try {
-    const fp  = path.join(DATA_DIR, `${collection}.json`);
-    const raw = fs.readFileSync(fp, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) throw new Error(`${collection}.json is not an array`);
-    return parsed;
-  } catch (err) {
-    throw new Error(`[DB] readAll(${collection}) failed: ${err.message}`);
-  }
+  const fp  = path.join(DATA_DIR, `${collection}.json`);
+  const raw = fs.readFileSync(fp, 'utf8');
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed)) throw new Error(`${collection}.json is not an array`);
+  return parsed;
 }
 
 function writeAll(collection, data) {
-  try {
-    const fp   = path.join(DATA_DIR, `${collection}.json`);
-    const tmp  = fp + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
-    fs.renameSync(tmp, fp);
-  } catch (err) {
-    throw new Error(`[DB] writeAll(${collection}) failed: ${err.message}`);
-  }
+  const fp   = path.join(DATA_DIR, `${collection}.json`);
+  const tmp  = fp + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
+  fs.renameSync(tmp, fp);
 }
 
 function create(collection, record) {
