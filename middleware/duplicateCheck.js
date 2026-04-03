@@ -1,10 +1,10 @@
 const { findMany } = require('../utils/fileDB');
 
-function duplicateCheck(req, res, next) {
+async function duplicateCheck(req, res, next) {
   const { patient, appointment } = req.body;
   const { date, timeSlot, branch } = appointment;
 
-  const existing = findMany('appointments', a =>
+  const existing = await findMany('appointments', a =>
     (a.patient.email === patient.email ||
      a.patient.phone.replace(/\D/g,'') === patient.phone.replace(/\D/g,'')) &&
     a.appointment.date     === date     &&

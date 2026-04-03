@@ -3,9 +3,9 @@ const { generateId } = require('../utils/idGenerator');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-exports.getAll = (req, res, next) => {
+exports.getAll = async (req, res, next) => {
   try {
-    const data = readAll('contacts');
+    const data = await readAll('contacts');
     data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     res.json({ success: true, data, total: data.length });
   } catch (err) { next(err); }
@@ -41,7 +41,7 @@ exports.create = async (req, res, next) => {
       message: message.trim(),
     };
 
-    const saved = create('contacts', record);
+    const saved = await create('contacts', record);
     res.status(201).json({ success: true, message: 'Thank you for your message.', data: saved });
   } catch (err) { next(err); }
 };

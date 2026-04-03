@@ -6,8 +6,8 @@ const ALL_SLOTS = [
   '3:00 PM',  '4:00 PM',  '5:00 PM'
 ];
 
-function getBookedSlots(date, branch) {
-  const booked = findMany('appointments', a =>
+async function getBookedSlots(date, branch) {
+  const booked = await findMany('appointments', a =>
     a.appointment.date   === date   &&
     a.appointment.branch === branch &&
     a.status             !== 'cancelled'
@@ -15,13 +15,13 @@ function getBookedSlots(date, branch) {
   return booked.map(a => a.appointment.timeSlot);
 }
 
-function isSlotAvailable(date, branch, timeSlot) {
-  const booked = getBookedSlots(date, branch);
+async function isSlotAvailable(date, branch, timeSlot) {
+  const booked = await getBookedSlots(date, branch);
   return !booked.includes(timeSlot);
 }
 
-function getSlotStatus(date, branch) {
-  const bookedSlots = getBookedSlots(date, branch);
+async function getSlotStatus(date, branch) {
+  const bookedSlots = await getBookedSlots(date, branch);
   return {
     date, branch,
     available: ALL_SLOTS.filter(s => !bookedSlots.includes(s)),
