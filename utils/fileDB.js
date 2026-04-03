@@ -1,30 +1,53 @@
 'use strict';
-const { kv } = require('@vercel/kv');
+const fs = require('fs');
+const path = require('path');
 
-const DATA_DIR = process.env.DATA_DIR
-  ? process.env.DATA_DIR
-  : './data';
+const inMemoryStore = {
+  appointments: [],
+  contacts: []
+};
+
+let useKV = false;
 
 async function initDB() {
-  console.log('[DB] Using Vercel KV Redis for data storage');
+  console.log('[DB] Initializing database...');
+  if (process.env.KV_URL) {
+    try {
+      const { kv } = require('@vercel/kv');
+      useKV = true;
+      console.log('[DB] Using Vercel KV Redis for data storage');
+    } catch (err) {
+      console.log('[DB] KV not available, using in-memory store');
+    }
+  } else {
+    console.log('[DB] Using in-memory store (no KV_URL set)');
+  }
 }
 
 async function readAll(collection) {
   try {
-    const data = await kv.get(`biraj_${collection}`);
-    return data || [];
+    if (useKV) {
+      const { kv } = require('@vercel/kv');
+      const data = await kv.get(`biraj_${collection}`);
+      return data || [];
+    }
+    return inMemoryStore[collection] || [];
   } catch (err) {
     console.error(`[DB] readAll(${collection}) error:`, err.message);
-    return [];
+    return inMemoryStore[collection] || [];
   }
 }
 
 async function writeAll(collection, data) {
   try {
-    await kv.set(`biraj_${collection}`, data);
+    if (useKV) {
+      const { kv } = require('@vercel/kv');
+      await kv.set(`biraj_${collection}`, data);
+    }
+    inMemoryStore[collection] = data;
   } catch (err) {
     console.error(`[DB] writeAll(${collection}) error:`, err.message);
-    throw err;
+    inMemoryStore[collection] = data;
   }
 }
 
