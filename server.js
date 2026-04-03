@@ -13,12 +13,23 @@ const allowedOrigins = [
   process.env.ALLOWED_ORIGIN,
   'http://localhost:5173',
   'http://localhost:4173',
-  'http://127.0.0.1:5173'
+  'http://127.0.0.1:5173',
+  'https://birajdental.com.np',
+  'https://www.birajdental.com.np'
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    // Allow all origins in production (API is public anyway)
+    // Or match against allowed list
+    if (!origin) return cb(null, true); // server-to-server, mobile apps, etc.
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    // Allow Vercel preview deployments
+    if (origin.endsWith('.vercel.app')) return cb(null, true);
+    // Allow localhost variations
+    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) return cb(null, true);
+    // In development, allow everything
+    if (process.env.NODE_ENV !== 'production') return cb(null, true);
     return cb(null, false);
   },
   credentials: true
