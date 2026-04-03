@@ -1,4 +1,4 @@
-const { create, readAll } = require('../utils/fileDB');
+const { create, readAll, findById, updateById, deleteById } = require('../utils/fileDB');
 const { generateId } = require('../utils/idGenerator');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -8,6 +8,14 @@ exports.getAll = (req, res, next) => {
     const data = readAll('contacts');
     data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     res.json({ success: true, data, total: data.length });
+  } catch (err) { next(err); }
+};
+
+exports.getById = (req, res, next) => {
+  try {
+    const record = findById('contacts', req.params.id);
+    if (!record) return res.status(404).json({ success: false, error: 'NOT_FOUND', message: `Contact ${req.params.id} not found.` });
+    res.json({ success: true, data: record });
   } catch (err) { next(err); }
 };
 
@@ -43,5 +51,21 @@ exports.create = (req, res, next) => {
 
     const saved = create('contacts', record);
     res.status(201).json({ success: true, message: 'Thank you for your message.', data: saved });
+  } catch (err) { next(err); }
+};
+
+exports.update = (req, res, next) => {
+  try {
+    const updated = updateById('contacts', req.params.id, req.body);
+    if (!updated) return res.status(404).json({ success: false, error: 'NOT_FOUND', message: `Contact ${req.params.id} not found.` });
+    res.json({ success: true, data: updated });
+  } catch (err) { next(err); }
+};
+
+exports.remove = (req, res, next) => {
+  try {
+    const deleted = deleteById('contacts', req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, error: 'NOT_FOUND', message: `Contact ${req.params.id} not found.` });
+    res.json({ success: true, message: `Contact ${req.params.id} permanently deleted.` });
   } catch (err) { next(err); }
 };
