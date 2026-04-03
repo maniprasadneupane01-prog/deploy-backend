@@ -2,9 +2,6 @@
 const fs   = require('fs');
 const path = require('path');
 
-const DEFAULT_DATA_DIR = path.join(__dirname, '../data');
-const FALLBACK_DIR = '/tmp/biraj-data';
-
 function isDirWritable(dir) {
   try {
     fs.accessSync(dir, fs.constants.W_OK);
@@ -15,46 +12,33 @@ function isDirWritable(dir) {
 }
 
 function resolveDataDir() {
-  // 1. Try the configured DATA_DIR env var
-  if (process.env.DATA_DIR) {
-    const configured = path.resolve(process.env.DATA_DIR);
-    if (isDirWritable(configured)) return configured;
-    // Dir doesn't exist — try to create it
-    try {
-      fs.mkdirSync(configured, { recursive: true });
-      if (isDirWritable(configured)) {
-        console.log(`[DB] Created data directory at ${configured}`);
-        return configured;
-      }
-    } catch {
-      // Cannot create or not writable — fall through
-    }
-    console.warn(`[DB] WARNING: DATA_DIR=${configured} is not writable. Falling back.`);
-  }
+  // 1. Try repo's local data directory (works locally and on most hosts)
+  const localDir = path.join(__dirname, '../data');
+  if (isDirWritable(localDir)) return localDir;
 
-  // 2. Try the repo's local data directory
-  if (isDirWritable(DEFAULT_DATA_DIR)) return DEFAULT_DATA_DIR;
+  // 2. Try creating it
+  try {
+    fs.mkdirSync(localDir, { recursive: true });
+    if (isDirWritable(localDir)) return localDir;
+  } catch { /* fall through */ }
 
   // 3. Try /tmp (always writable on Render, but ephemeral)
+  const tmpDir = '/tmp/biraj-data';
   try {
-    fs.mkdirSync(FALLBACK_DIR, { recursive: true });
-    if (isDirWritable(FALLBACK_DIR)) {
-      console.warn(`[DB] WARNING: Using /tmp/biraj-data (data resets on restart).`);
-      console.warn(`[DB] To persist data on Render, add a Persistent Disk and set DATA_DIR.`);
-      return FALLBACK_DIR;
+    fs.mkdirSync(tmpDir, { recursive: true });
+    if (isDirWritable(tmpDir)) {
+      console.log('[DB] Using /tmp/biraj-data (data resets on restart)');
+      return tmpDir;
     }
-  } catch {
-    // fall through
-  }
+  } catch { /* fall through */ }
 
-  // 4. Last resort — crash with clear message
+  // 4. Last resort
   console.error('[DB] FATAL: No writable data directory found.');
-  console.error('[DB] On Render: Dashboard → Your Service → Disks → Create Disk → Mount at /app/data');
-  console.error('[DB] Then set env var: DATA_DIR=/app/data');
   process.exit(1);
 }
 
 const DATA_DIR = resolveDataDir();
+console.log(`[DB] Data directory: ${DATA_DIR}`);
 
 function initDB() {
   if (!fs.existsSync(DATA_DIR)) {
