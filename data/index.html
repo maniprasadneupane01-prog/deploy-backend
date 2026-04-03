@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biraj Dental — Data Viewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=IBM+Plex+Mono:wght@400;600&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       CSS RESET & VARIABLES
+       ═══════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --terra-100:   #FDF0EB;
+      --terra-200:   #F6D0C0;
+      --terra-300:   #E8A080;
+      --terra-400:   #D4714A;
+      --terra-500:   #C0522A;
+      --terra-600:   #A03E1C;
+      --terra-700:   #7D2E11;
+      --terra-800:   #5A1F08;
+      --terra-900:   #3A1105;
+
+      --gold-100:    #FEF9EC;
+      --gold-200:    #FAE8A8;
+      --gold-300:    #F5D468;
+      --gold-400:    #E8B83A;
+      --gold-500:    #D4A017;
+      --gold-600:    #A87C10;
+      --gold-700:    #7C5A08;
+
+      --ink-100:     #3D2B14;
+      --ink-200:     #2C1F10;
+      --ink-300:     #1F1509;
+      --ink-400:     #1A1008;
+      --ink-500:     #120B05;
+
+      --bg-page:        var(--ink-400);
+      --bg-section-alt: var(--ink-200);
+      --bg-card:        var(--ink-100);
+      --bg-elevated:    #4A3520;
+
+      --text-primary:   #FBF7F0;
+      --text-secondary: #C9B99A;
+      --text-muted:     #8B7B6B;
+      --text-disabled:  #5A4A3A;
+
+      --border-subtle:  rgba(201, 185, 154, 0.12);
+      --border-default: rgba(201, 185, 154, 0.25);
+      --border-strong:  rgba(192, 82, 42, 0.50);
+      --border-brand:   rgba(192, 82, 42, 0.80);
+
+      --success:     #22C55E;
+      --success-bg:  rgba(34, 197, 94, 0.10);
+      --warning:     #F59E0B;
+      --warning-bg:  rgba(245, 158, 11, 0.10);
+      --error:       #EF4444;
+      --error-bg:    rgba(239, 68, 68, 0.10);
+      --info:        #3B82F6;
+      --info-bg:     rgba(59, 130, 246, 0.10);
+
+      --shadow-sm: 0 2px 8px rgba(26,16,8,0.25), 0 1px 3px rgba(26,16,8,0.15);
+      --shadow-md: 0 8px 24px rgba(26,16,8,0.30), 0 2px 8px rgba(26,16,8,0.20);
+      --shadow-lg: 0 20px 60px rgba(26,16,8,0.40), 0 8px 20px rgba(26,16,8,0.25);
+      --shadow-brand: 0 8px 30px rgba(192,82,42,0.35), 0 2px 8px rgba(192,82,42,0.20);
+
+      --radius-sm:  6px;
+      --radius-md:  12px;
+      --radius-lg:  20px;
+      --radius-xl:  28px;
+      --radius-full: 9999px;
+
+      --space-1:  0.25rem;
+      --space-2:  0.5rem;
+      --space-3:  0.75rem;
+      --space-4:  1rem;
+      --space-5:  1.25rem;
+      --space-6:  1.5rem;
+      --space-8:  2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --space-20: 5rem;
+
+      --font-display: 'Yeseva One', serif;
+      --font-heading: 'Cormorant Garamond', serif;
+      --font-body:    'DM Sans', sans-serif;
+      --font-mono:    'IBM Plex Mono', monospace;
+
+      --max-width: 1440px;
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LAYOUT
+       ═══════════════════════════════════════════════════════ */
+    .app {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-6) var(--space-16);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════ */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+      margin-bottom: var(--space-10);
+      padding-bottom: var(--space-6);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+    }
+
+    .logo-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 3vw, 1.75rem);
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .header h1 span {
+      color: var(--terra-500);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .refresh-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .refresh-info .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border-default);
+      border-top-color: var(--terra-500);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .btn-refresh {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      font-size: 1.1rem;
+    }
+
+    .btn-refresh:hover {
+      border-color: var(--terra-500);
+      color: var(--terra-400);
+      background: rgba(192, 82, 42, 0.08);
+    }
+
+    .btn-refresh.spinning svg {
+      animation: spin 0.6s linear;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TAB NAVIGATION
+       ═══════════════════════════════════════════════════════ */
+    .tab-nav {
+      display: flex;
+      gap: var(--space-2);
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid var(--border-default);
+      padding-bottom: 0;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      bottom: -1px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-secondary);
+    }
+
+    .tab-btn.active {
+      color: var(--terra-400);
+      border-bottom-color: var(--terra-500);
+    }
+
+    .tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--terra-500);
+      color: white;
+      margin-left: 6px;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       STAT CARDS
+       ═══════════════════════════════════════════════════════ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: var(--space-5) var(--space-6);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-card .stat-number {
+      font-family: var(--font-display);
+      font-size: 2.25rem;
+      line-height: 1;
+      color: var(--accent);
+      margin-bottom: var(--space-1);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .stat-card[data-filter="all"]       { --accent: var(--terra-500); }
+    .stat-card[data-filter="pending"]   { --accent: var(--warning); }
+    .stat-card[data-filter="confirmed"] { --accent: var(--success); }
+    .stat-card[data-filter="today"]     { --accent: var(--info); }
+
+    /* ═══════════════════════════════════════════════════════
+       FILTERS BAR
+       ═══════════════════════════════════════════════════════ */
+    .filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      margin-bottom: var(--space-6);
+      align-items: center;
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .search-wrapper svg {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.7rem 1rem 0.7rem 2.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--terra-500);
+      box-shadow: 0 0 0 3px rgba(192, 82, 42, 0.15);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-disabled);
+    }
+
+    .filter-select,
+    .filter-date {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 2rem 0.7rem 0.85rem;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B7B6B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.65rem center;
+    }
+
+    .filter-select:focus,
+    .filter-date:focus {
+      outline: none;
+      border-color: var(--terra-500);
+      box-shadow: 0 0 0 3px rgba(192, 82, 42, 0.15);
+    }
+
+    .filter-date {
+      color-scheme: dark;
+    }
+
+    .btn-clear {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 1rem;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-clear:hover {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .btn-csv {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 1.1rem;
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      white-space: nowrap;
+    }
+
+    .btn-csv:hover {
+      border-color: var(--terra-500);
+      color: var(--terra-400);
+      background: rgba(192, 82, 42, 0.08);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TABLE
+       ═══════════════════════════════════════════════════════ */
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: var(--space-6);
+      position: relative;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    thead {
+      background: var(--ink-200);
+    }
+
+    thead th {
+      padding: var(--space-3) var(--space-4);
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-default);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    thead th:hover {
+      color: var(--terra-400);
+    }
+
+    thead th .sort-arrow {
+      display: inline-block;
+      margin-left: 4px;
+      opacity: 0.3;
+      font-size: 0.65rem;
+      transition: opacity 0.2s;
+    }
+
+    thead th.sorted .sort-arrow {
+      opacity: 1;
+      color: var(--terra-500);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border-subtle);
+      transition: all 0.3s ease;
+    }
+
+    tbody tr:hover {
+      background: rgba(192, 82, 42, 0.04);
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr.flash-gold {
+      animation: flashGold 1.5s ease;
+    }
+
+    tbody tr.flash-green {
+      animation: flashGreen 1s ease;
+    }
+
+    tbody tr.flash-red {
+      animation: flashRed 1s ease;
+    }
+
+    tbody tr.fade-out {
+      animation: fadeOut 0.4s ease forwards;
+    }
+
+    @keyframes flashGold {
+      0%   { box-shadow: inset 0 0 0 2px var(--gold-500); }
+      100% { box-shadow: inset 0 0 0 2px transparent; }
+    }
+
+    @keyframes flashGreen {
+      0%   { background: var(--success-bg); }
+      100% { background: transparent; }
+    }
+
+    @keyframes flashRed {
+      0%   { background: var(--error-bg); }
+      100% { background: transparent; }
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateX(30px); max-height: 0; padding: 0; overflow: hidden; }
+    }
+
+    tbody td {
+      padding: var(--space-4);
+      font-size: 0.875rem;
+      vertical-align: middle;
+    }
+
+    .cell-id {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--terra-400);
+      white-space: nowrap;
+    }
+
+    .cell-patient-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+    }
+
+    .cell-patient-email {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .cell-service {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .cell-date {
+      font-weight: 500;
+      display: block;
+    }
+
+    .cell-time {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .cell-booked {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.65rem;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-pending   { background: rgba(245, 158, 11, 0.12); color: #F59E0B; }
+    .status-confirmed { background: rgba(34, 197, 94, 0.12); color: #22C55E; }
+    .status-cancelled { background: rgba(239, 68, 68, 0.12); color: #EF4444; }
+    .status-completed { background: rgba(59, 130, 246, 0.12); color: #3B82F6; }
+    .status-no-show   { background: rgba(168, 85, 247, 0.12); color: #A855F7; }
+
+    /* Action buttons */
+    .cell-actions {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .btn-action {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .btn-action:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .btn-action.btn-confirm:hover {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-bg);
+    }
+
+    .btn-action.btn-cancel:hover {
+      border-color: var(--warning);
+      color: var(--warning);
+      background: var(--warning-bg);
+    }
+
+    .btn-action.btn-delete:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-bg);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CONTACTS TABLE
+       ═══════════════════════════════════════════════════════ */
+    .contacts-table {
+      min-width: 700px;
+    }
+
+    .contacts-table thead th {
+      padding: var(--space-3) var(--space-4);
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-default);
+      white-space: nowrap;
+    }
+
+    .contacts-table tbody tr {
+      border-bottom: 1px solid var(--border-subtle);
+      transition: all 0.3s ease;
+    }
+
+    .contacts-table tbody tr:hover {
+      background: rgba(192, 82, 42, 0.04);
+    }
+
+    .contacts-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .contacts-table tbody td {
+      padding: var(--space-4);
+      font-size: 0.875rem;
+      vertical-align: middle;
+    }
+
+    .cell-message {
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-secondary);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       EMPTY STATE
+       ═══════════════════════════════════════════════════════ */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-16) var(--space-6);
+    }
+
+    .empty-state svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: var(--space-6);
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-2);
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PAGINATION
+       ═══════════════════════════════════════════════════════ */
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+    }
+
+    .pagination-info {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .btn-page {
+      min-width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-default);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      padding: 0 var(--space-2);
+    }
+
+    .btn-page:hover:not(:disabled) {
+      border-color: var(--terra-500);
+      color: var(--terra-400);
+    }
+
+    .btn-page:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-page.active {
+      background: var(--terra-500);
+      border-color: var(--terra-500);
+      color: white;
+    }
+
+    .page-ellipsis {
+      color: var(--text-muted);
+      padding: 0 var(--space-1);
+      font-size: 0.85rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       DELETE MODAL
+       ═══════════════════════════════════════════════════════ */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 8, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      max-width: 420px;
+      width: 90%;
+      box-shadow: var(--shadow-lg);
+      transform: scale(0.95);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-backdrop.visible .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      margin-bottom: var(--space-3);
+      color: var(--text-primary);
+    }
+
+    .modal-card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-6);
+      line-height: 1.6;
+    }
+
+    .modal-card .modal-id {
+      font-family: var(--font-mono);
+      color: var(--terra-400);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: var(--space-3);
+      justify-content: flex-end;
+    }
+
+    .btn-modal-cancel {
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 1.25rem;
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-modal-cancel:hover {
+      border-color: var(--text-muted);
+      color: var(--text-primary);
+    }
+
+    .btn-modal-delete {
+      background: var(--error);
+      border: 1px solid var(--error);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 1.25rem;
+      color: white;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-modal-delete:hover {
+      background: #DC2626;
+      border-color: #DC2626;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TOAST NOTIFICATIONS
+       ═══════════════════════════════════════════════════════ */
+    .toast-container {
+      position: fixed;
+      top: var(--space-6);
+      right: var(--space-6);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: var(--space-4) var(--space-5);
+      box-shadow: var(--shadow-lg);
+      max-width: 380px;
+      pointer-events: auto;
+      animation: toastIn 0.3s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+
+    .toast.toast-out {
+      animation: toastOut 0.3s ease forwards;
+    }
+
+    .toast-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .toast-success { border-left: 3px solid var(--success); }
+    .toast-error   { border-left: 3px solid var(--error); }
+    .toast-warning { border-left: 3px solid var(--warning); }
+    .toast-info    { border-left: 3px solid var(--info); }
+
+    .toast-content {
+      flex: 1;
+    }
+
+    .toast-title {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 2px;
+    }
+
+    .toast-message {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes toastOut {
+      to { opacity: 0; transform: translateX(40px); }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LOADING STATE
+       ═══════════════════════════════════════════════════════ */
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(26, 16, 8, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      border-radius: var(--radius-md);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .loading-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border-default);
+      border-top-color: var(--terra-500);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SERVICE COLOR MAP
+       ═══════════════════════════════════════════════════════ */
+    .svc-general      { background: rgba(192, 82, 42, 0.12); color: #E8A080; }
+    .svc-extraction   { background: rgba(125, 46, 17, 0.15); color: #E8A080; }
+    .svc-fillings     { background: rgba(212, 160, 23, 0.12); color: #F5D468; }
+    .svc-root-canal   { background: rgba(160, 62, 28, 0.15); color: #F6D0C0; }
+    .svc-whitening    { background: rgba(245, 212, 104, 0.10); color: #FAE8A8; }
+    .svc-implants     { background: rgba(59, 130, 246, 0.12); color: #93C5FD; }
+    .svc-orthodontics { background: rgba(168, 85, 247, 0.12); color: #C084FC; }
+    .svc-pediatric    { background: rgba(34, 197, 94, 0.12); color: #86EFAC; }
+
+    /* ═══════════════════════════════════════════════════════
+       RESPONSIVE
+       ═══════════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .app { padding: var(--space-4) var(--space-4) var(--space-12); }
+
+      .header { flex-direction: column; align-items: flex-start; }
+      .header-right { width: 100%; justify-content: space-between; }
+
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+      .filters-bar { flex-direction: column; }
+      .search-wrapper { width: 100%; }
+      .filter-select, .filter-date { width: 100%; }
+      .btn-csv { width: 100%; justify-content: center; }
+
+      .pagination-bar { flex-direction: column; align-items: stretch; text-align: center; }
+      .pagination-controls { justify-content: center; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 4C14 4 10 8 9.5 13C9 18 10 22 11 27C12 32 14 36 16 36C18 36 18.5 32 20 32C21.5 32 22 36 24 36C26 36 28 32 29 27C30 22 31 18 30.5 13C30 8 26 4 20 4Z" fill="#C0522A" opacity="0.9"/>
+            <path d="M20 4C14 4 10 8 9.5 13C9 18 10 22 11 27C12 32 14 36 16 36C18 36 18.5 32 20 32C21.5 32 22 36 24 36C26 36 28 32 29 27C30 22 31 18 30.5 13C30 8 26 4 20 4Z" stroke="#D4A017" stroke-width="1.5" opacity="0.6"/>
+          </svg>
+        </div>
+        <h1><span>Biraj Dental</span> — Data Viewer</h1>
+      </div>
+      <div class="header-right">
+        <div class="refresh-info">
+          <span class="spinner" id="refreshSpinner"></span>
+          <span id="refreshCounter">Auto-refresh in 30s</span>
+        </div>
+        <button class="btn-refresh" id="btnRefresh" aria-label="Refresh data" title="Refresh now">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+            <path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- TAB NAVIGATION -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="appointments">
+        Appointments <span class="tab-badge" id="apptBadge">0</span>
+      </button>
+      <button class="tab-btn" data-tab="contacts">
+        Contacts <span class="tab-badge" id="contactBadge">0</span>
+      </button>
+    </nav>
+
+    <!-- APPOINTMENTS TAB -->
+    <div class="tab-content active" id="tab-appointments">
+      <!-- STAT CARDS -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card" data-filter="all">
+          <div class="stat-number" id="statTotal">0</div>
+          <div class="stat-label">Total Appointments</div>
+        </div>
+        <div class="stat-card" data-filter="pending">
+          <div class="stat-number" id="statPending">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card" data-filter="confirmed">
+          <div class="stat-number" id="statConfirmed">0</div>
+          <div class="stat-label">Confirmed</div>
+        </div>
+        <div class="stat-card" data-filter="today">
+          <div class="stat-number" id="statToday">0</div>
+          <div class="stat-label">Today</div>
+        </div>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="filters-bar">
+        <div class="search-wrapper">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search name, email, phone, or ID..." autocomplete="off">
+        </div>
+        <select class="filter-select" id="filterStatus">
+          <option value="all">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="completed">Completed</option>
+          <option value="no-show">No Show</option>
+        </select>
+        <select class="filter-select" id="filterBranch">
+          <option value="all">All Branches</option>
+          <option value="suryabinayak">Suryabinayak</option>
+          <option value="gatthaghar">Gatthaghar</option>
+        </select>
+        <input type="date" class="filter-date" id="filterDate" title="Filter by appointment date">
+        <button class="btn-clear" id="btnClearFilters" title="Clear all filters">Clear</button>
+        <button class="btn-csv" id="btnExportCSV" title="Export to CSV">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export CSV
+        </button>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-container" style="position:relative;">
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="loading-spinner"></div>
+        </div>
+        <div class="table-scroll">
+          <table id="appointmentsTable">
+            <thead>
+              <tr>
+                <th data-sort="id">ID <span class="sort-arrow">&#9650;</span></th>
+                <th data-sort="patient.name">Patient <span class="sort-arrow">&#9650;</span></th>
+                <th data-sort="appointment.service">Service <span class="sort-arrow">&#9650;</span></th>
+                <th data-sort="appointment.branch">Branch <span class="sort-arrow">&#9650;</span></th>
+                <th data-sort="appointment.date">Date &amp; Time <span class="sort-arrow">&#9650;</span></th>
+                <th data-sort="status">Status <span class="sort-arrow">&#9650;</span></th>
+                <th data-sort="createdAt">Booked <span class="sort-arrow">&#9650;</span></th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination-bar" id="paginationBar">
+        <div class="pagination-info" id="paginationInfo"></div>
+        <div class="pagination-controls" id="paginationControls"></div>
+      </div>
+    </div>
+
+    <!-- CONTACTS TAB -->
+    <div class="tab-content" id="tab-contacts">
+      <div class="table-container" style="position:relative;">
+        <div class="loading-overlay" id="contactsLoadingOverlay">
+          <div class="loading-spinner"></div>
+        </div>
+        <div class="table-scroll">
+          <table class="contacts-table" id="contactsTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Message</th>
+                <th>Received</th>
+              </tr>
+            </thead>
+            <tbody id="contactsBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE MODAL -->
+  <div class="modal-backdrop" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-card">
+      <h3 id="deleteModalTitle">Confirm Deletion</h3>
+      <p>Delete appointment <span class="modal-id" id="deleteModalId"></span>? This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" id="btnModalCancel">Cancel</button>
+        <button class="btn-modal-delete" id="btnModalDelete">Delete Permanently</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    'use strict';
+
+    /* ═══════════════════════════════════════════════════════
+       CONFIGURATION
+       ═══════════════════════════════════════════════════════ */
+    const API_URL    = 'http://localhost:5000/api';
+    const PER_PAGE   = 10;
+    const AUTO_REFRESH_MS = 30_000;
+
+    /* ═══════════════════════════════════════════════════════
+       STATE
+       ═══════════════════════════════════════════════════════ */
+    let allAppointments = [];
+    let allContacts = [];
+    let filteredData    = [];
+    let currentPage     = 1;
+    let sortColumn      = 'createdAt';
+    let sortDir         = 'desc';
+    let activeFilter    = 'all';
+    let deleteTargetId  = null;
+    let autoRefreshTimer = null;
+    let countdownTimer   = null;
+    let countdownSeconds = AUTO_REFRESH_MS / 1000;
+    let previousIds      = new Set();
+    let activeTab        = 'appointments';
+
+    /* ═══════════════════════════════════════════════════════
+       DOM REFERENCES
+       ═══════════════════════════════════════════════════════ */
+    const $  = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+
+    const dom = {
+      statsGrid:          $('#statsGrid'),
+      statTotal:          $('#statTotal'),
+      statPending:        $('#statPending'),
+      statConfirmed:      $('#statConfirmed'),
+      statToday:          $('#statToday'),
+      searchInput:        $('#searchInput'),
+      filterStatus:       $('#filterStatus'),
+      filterBranch:       $('#filterBranch'),
+      filterDate:         $('#filterDate'),
+      btnClearFilters:    $('#btnClearFilters'),
+      btnExportCSV:       $('#btnExportCSV'),
+      btnRefresh:         $('#btnRefresh'),
+      refreshCounter:     $('#refreshCounter'),
+      refreshSpinner:     $('#refreshSpinner'),
+      loadingOverlay:     $('#loadingOverlay'),
+      tableBody:          $('#tableBody'),
+      paginationInfo:     $('#paginationInfo'),
+      paginationControls: $('#paginationControls'),
+      deleteModal:        $('#deleteModal'),
+      deleteModalId:      $('#deleteModalId'),
+      btnModalCancel:     $('#btnModalCancel'),
+      btnModalDelete:     $('#btnModalDelete'),
+      toastContainer:     $('#toastContainer'),
+      contactsBody:       $('#contactsBody'),
+      contactsLoading:    $('#contactsLoadingOverlay'),
+      apptBadge:          $('#apptBadge'),
+      contactBadge:       $('#contactBadge'),
+    };
+
+    /* ═══════════════════════════════════════════════════════
+       TAB NAVIGATION
+       ═══════════════════════════════════════════════════════ */
+    $$('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        $$('.tab-btn').forEach(b => b.classList.remove('active'));
+        $$('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        activeTab = btn.dataset.tab;
+        $(`#tab-${activeTab}`).classList.add('active');
+      });
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       UTILITY FUNCTIONS
+       ═══════════════════════════════════════════════════════ */
+    function formatRelative(dateStr) {
+      if (!dateStr) return '—';
+      const now  = new Date();
+      const then = new Date(dateStr);
+      const diff = Math.floor((now - then) / 1000);
+
+      if (diff < 0) return 'just now';
+      if (diff < 60) return `${diff}s ago`;
+      if (diff < 3600) {
+        const m = Math.floor(diff / 60);
+        return m === 1 ? '1 minute ago' : `${m} minutes ago`;
+      }
+      if (diff < 86400) {
+        const h = Math.floor(diff / 3600);
+        return h === 1 ? '1 hour ago' : `${h} hours ago`;
+      }
+      if (diff < 604800) {
+        const d = Math.floor(diff / 86400);
+        return d === 1 ? '1 day ago' : `${d} days ago`;
+      }
+      return then.toLocaleDateString('en-NP', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function getServiceClass(service) {
+      if (!service) return '';
+      const s = service.toLowerCase();
+      if (s.includes('general') || s.includes('checkup') || s.includes('cleaning')) return 'svc-general';
+      if (s.includes('extraction')) return 'svc-extraction';
+      if (s.includes('filling')) return 'svc-fillings';
+      if (s.includes('root canal')) return 'svc-root-canal';
+      if (s.includes('whitening')) return 'svc-whitening';
+      if (s.includes('implant')) return 'svc-implants';
+      if (s.includes('orthodont') || s.includes('braces')) return 'svc-orthodontics';
+      if (s.includes('pediatric') || s.includes('child')) return 'svc-pediatric';
+      return 'svc-general';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      try {
+        return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-NP', {
+          weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+        });
+      } catch {
+        return dateStr;
+      }
+    }
+
+    function escapeCSV(val) {
+      if (val == null) return '';
+      const s = String(val);
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TOAST SYSTEM
+       ═══════════════════════════════════════════════════════ */
+    function showToast(type, title, message, duration = 4000) {
+      const icons = { success: '&#10003;', error: '&#10007;', warning: '&#9888;', info: '&#8505;' };
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.innerHTML = `
+        <span class="toast-icon">${icons[type] || icons.info}</span>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          ${message ? `<div class="toast-message">${message}</div>` : ''}
+        </div>
+      `;
+      dom.toastContainer.appendChild(el);
+      setTimeout(() => {
+        el.classList.add('toast-out');
+        setTimeout(() => el.remove(), 300);
+      }, duration);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       API FUNCTIONS
+       ═══════════════════════════════════════════════════════ */
+    async function fetchAppointments() {
+      try {
+        const res = await fetch(`${API_URL}/appointments`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        return json.data || [];
+      } catch (err) {
+        console.error('[API] Failed to fetch appointments:', err);
+        showToast('error', 'Fetch Failed', 'Could not connect to the API server. Is the backend running?');
+        return [];
+      }
+    }
+
+    async function fetchContacts() {
+      try {
+        const res = await fetch(`${API_URL}/contact`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        return json.data || [];
+      } catch (err) {
+        console.error('[API] Failed to fetch contacts:', err);
+        return [];
+      }
+    }
+
+    async function updateStatus(id, status) {
+      try {
+        const res = await fetch(`${API_URL}/appointments/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        if (!res.ok) {
+          const json = await res.json();
+          throw new Error(json.message || `HTTP ${res.status}`);
+        }
+        return true;
+      } catch (err) {
+        console.error('[API] Update failed:', err);
+        showToast('error', 'Update Failed', err.message);
+        return false;
+      }
+    }
+
+    async function deleteAppointment(id) {
+      try {
+        const res = await fetch(`${API_URL}/appointments/${id}`, {
+          method: 'DELETE'
+        });
+        if (!res.ok) {
+          const json = await res.json();
+          throw new Error(json.message || `HTTP ${res.status}`);
+        }
+        return true;
+      } catch (err) {
+        console.error('[API] Delete failed:', err);
+        showToast('error', 'Delete Failed', err.message);
+        return false;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FILTERING & SORTING
+       ═══════════════════════════════════════════════════════ */
+    function applyFilters() {
+      const query    = dom.searchInput.value.toLowerCase().trim();
+      const status   = dom.filterStatus.value;
+      const branch   = dom.filterBranch.value;
+      const date     = dom.filterDate.value;
+
+      filteredData = allAppointments.filter(a => {
+        if (activeFilter !== 'all') {
+          if (activeFilter === 'today') {
+            const today = new Date().toISOString().slice(0, 10);
+            if (a.appointment.date !== today) return false;
+          } else {
+            if (a.status !== activeFilter) return false;
+          }
+        }
+
+        if (status !== 'all' && a.status !== status) return false;
+        if (branch !== 'all' && a.appointment.branch !== branch) return false;
+        if (date && a.appointment.date !== date) return false;
+
+        if (query) {
+          const haystack = [
+            a.id,
+            a.patient.name,
+            a.patient.email,
+            a.patient.phone,
+            a.appointment.service,
+            a.appointment.branch
+          ].join(' ').toLowerCase();
+          if (!haystack.includes(query)) return false;
+        }
+
+        return true;
+      });
+
+      sortData();
+      currentPage = 1;
+      renderAll();
+    }
+
+    function sortData() {
+      filteredData.sort((a, b) => {
+        let va, vb;
+
+        if (sortColumn === 'id') {
+          va = a.id; vb = b.id;
+        } else if (sortColumn === 'patient.name') {
+          va = a.patient.name.toLowerCase(); vb = b.patient.name.toLowerCase();
+        } else if (sortColumn === 'appointment.service') {
+          va = a.appointment.service.toLowerCase(); vb = b.appointment.service.toLowerCase();
+        } else if (sortColumn === 'appointment.branch') {
+          va = a.appointment.branch; vb = b.appointment.branch;
+        } else if (sortColumn === 'appointment.date') {
+          va = a.appointment.date + (a.appointment.timeSlot || '');
+          vb = b.appointment.date + (b.appointment.timeSlot || '');
+        } else if (sortColumn === 'status') {
+          const order = { pending: 0, confirmed: 1, completed: 2, 'no-show': 3, cancelled: 4 };
+          va = order[a.status] ?? 5; vb = order[b.status] ?? 5;
+        } else if (sortColumn === 'createdAt') {
+          va = new Date(a.createdAt).getTime(); vb = new Date(b.createdAt).getTime();
+        } else {
+          va = a.createdAt; vb = b.createdAt;
+        }
+
+        if (va < vb) return sortDir === 'asc' ? -1 : 1;
+        if (va > vb) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       RENDER FUNCTIONS
+       ═══════════════════════════════════════════════════════ */
+    function renderStats() {
+      const today = new Date().toISOString().slice(0, 10);
+      const total     = allAppointments.length;
+      const pending   = allAppointments.filter(a => a.status === 'pending').length;
+      const confirmed = allAppointments.filter(a => a.status === 'confirmed').length;
+      const todayCount = allAppointments.filter(a => a.appointment.date === today).length;
+
+      dom.statTotal.textContent     = total;
+      dom.statPending.textContent   = pending;
+      dom.statConfirmed.textContent = confirmed;
+      dom.statToday.textContent     = todayCount;
+
+      $$('.stat-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.filter === activeFilter);
+      });
+
+      dom.apptBadge.textContent = total;
+      dom.contactBadge.textContent = allContacts.length;
+    }
+
+    function renderTable() {
+      const start = (currentPage - 1) * PER_PAGE;
+      const page  = filteredData.slice(start, start + PER_PAGE);
+
+      if (filteredData.length === 0) {
+        const query = dom.searchInput.value.trim();
+        const hasFilters = dom.filterStatus.value !== 'all' || dom.filterBranch.value !== 'all' || dom.filterDate.value;
+        let msg = 'No appointments found.';
+        let extra = '';
+        if (query) extra = 'Try a different search term.';
+        else if (hasFilters) extra = 'Try adjusting your filters.';
+
+        dom.tableBody.innerHTML = `
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M40 8C30 8 24 16 23 24C22 32 24 40 26 48C28 56 32 64 35 64C38 64 39 56 40 56C41 56 42 64 45 64C48 64 52 56 54 48C56 40 58 32 57 24C56 16 50 8 40 8Z" stroke="#C0522A" stroke-width="2" fill="none"/>
+                  <circle cx="34" cy="28" r="3" fill="#C0522A" opacity="0.3"/>
+                  <circle cx="46" cy="28" r="3" fill="#C0522A" opacity="0.3"/>
+                </svg>
+                <h3>${msg}</h3>
+                ${extra ? `<p>${extra}</p>` : ''}
+                ${hasFilters || query ? `<button class="clear-link" onclick="clearAllFilters()" style="color:var(--terra-400);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:var(--font-body);font-size:0.9rem;margin-top:var(--space-3);display:inline-block;">Clear all filters</button>` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+        dom.paginationInfo.textContent = '';
+        dom.paginationControls.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+      page.forEach(a => {
+        const isNew = !previousIds.has(a.id);
+        const branchLabel = a.appointment.branch === 'suryabinayak' ? 'Suryabinayak' : 'Gatthaghar';
+        const statusClass = `status-${a.status}`;
+        const svcClass    = getServiceClass(a.appointment.service);
+
+        html += `
+          <tr data-id="${a.id}" ${isNew ? 'class="flash-gold"' : ''}>
+            <td class="cell-id">${a.id}</td>
+            <td>
+              <span class="cell-patient-name">${escapeHtml(a.patient.name)}</span>
+              <span class="cell-patient-email">${escapeHtml(a.patient.email)}</span>
+            </td>
+            <td><span class="cell-service ${svcClass}">${escapeHtml(a.appointment.service)}</span></td>
+            <td>${branchLabel}</td>
+            <td>
+              <span class="cell-date">${formatDate(a.appointment.date)}</span>
+              <span class="cell-time">${escapeHtml(a.appointment.timeSlot || '—')}</span>
+            </td>
+            <td><span class="status-badge ${statusClass}">${a.status}</span></td>
+            <td class="cell-booked">${formatRelative(a.createdAt)}</td>
+            <td>
+              <div class="cell-actions">
+                <button class="btn-action btn-confirm" data-action="confirm" data-id="${a.id}" title="Confirm appointment" aria-label="Confirm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="btn-action btn-cancel" data-action="cancel" data-id="${a.id}" title="Cancel appointment" aria-label="Cancel">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+                <button class="btn-action btn-delete" data-action="delete" data-id="${a.id}" title="Delete appointment" aria-label="Delete">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      dom.tableBody.innerHTML = html;
+      renderPagination();
+    }
+
+    function renderContacts() {
+      if (allContacts.length === 0) {
+        dom.contactsBody.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M40 8C30 8 24 16 23 24C22 32 24 40 26 48C28 56 32 64 35 64C38 64 39 56 40 56C41 56 42 64 45 64C48 64 52 56 54 48C56 40 58 32 57 24C56 16 50 8 40 8Z" stroke="#C0522A" stroke-width="2" fill="none"/>
+                  <circle cx="34" cy="28" r="3" fill="#C0522A" opacity="0.3"/>
+                  <circle cx="46" cy="28" r="3" fill="#C0522A" opacity="0.3"/>
+                </svg>
+                <h3>No contact messages yet.</h3>
+                <p>Contact form submissions will appear here.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      let html = '';
+      allContacts.forEach(c => {
+        html += `
+          <tr>
+            <td><span class="cell-patient-name">${escapeHtml(c.name || '—')}</span></td>
+            <td><span class="cell-patient-email">${escapeHtml(c.email || '—')}</span></td>
+            <td>${escapeHtml(c.phone || '—')}</td>
+            <td class="cell-message" title="${escapeHtml(c.message || '')}">${escapeHtml(c.message || '—')}</td>
+            <td class="cell-booked">${formatRelative(c.createdAt || c.timestamp)}</td>
+          </tr>
+        `;
+      });
+
+      dom.contactsBody.innerHTML = html;
+    }
+
+    function renderPagination() {
+      const total     = filteredData.length;
+      const totalPages = Math.ceil(total / PER_PAGE);
+      const start      = (currentPage - 1) * PER_PAGE + 1;
+      const end        = Math.min(currentPage * PER_PAGE, total);
+
+      dom.paginationInfo.textContent = total > 0
+        ? `Showing ${start}–${end} of ${total} appointments`
+        : '';
+
+      if (totalPages <= 1) {
+        dom.paginationControls.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+      html += `<button class="btn-page" data-page="prev" ${currentPage === 1 ? 'disabled' : ''}>&#8592;</button>`;
+
+      const pages = getPageNumbers(currentPage, totalPages);
+      pages.forEach(p => {
+        if (p === '...') {
+          html += `<span class="page-ellipsis">&#8230;</span>`;
+        } else {
+          html += `<button class="btn-page ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
+        }
+      });
+
+      html += `<button class="btn-page" data-page="next" ${currentPage === totalPages ? 'disabled' : ''}>&#8594;</button>`;
+      dom.paginationControls.innerHTML = html;
+    }
+
+    function getPageNumbers(current, total) {
+      if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+      const pages = [];
+      if (current <= 4) {
+        for (let i = 1; i <= 5; i++) pages.push(i);
+        pages.push('...', total);
+      } else if (current >= total - 3) {
+        pages.push(1, '...');
+        for (let i = total - 4; i <= total; i++) pages.push(i);
+      } else {
+        pages.push(1, '...', current - 1, current, current + 1, '...', total);
+      }
+      return pages;
+    }
+
+    function renderAll() {
+      renderStats();
+      renderTable();
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CLEAR FILTERS
+       ═══════════════════════════════════════════════════════ */
+    function clearAllFilters() {
+      dom.searchInput.value = '';
+      dom.filterStatus.value = 'all';
+      dom.filterBranch.value = 'all';
+      dom.filterDate.value = '';
+      activeFilter = 'all';
+      applyFilters();
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CSV EXPORT
+       ═══════════════════════════════════════════════════════ */
+    function exportCSV() {
+      if (filteredData.length === 0) {
+        showToast('warning', 'No Data', 'No appointments to export.');
+        return;
+      }
+
+      const BOM = '\uFEFF';
+      const headers = ['ID','Name','Email','Phone','Age','Gender','Service','Branch','Date','Time','Notes','Status','Booked At'];
+      const rows = filteredData.map(a => [
+        a.id, a.patient.name, a.patient.email, a.patient.phone,
+        a.patient.age || '', a.patient.gender || '',
+        a.appointment.service, a.appointment.branch,
+        a.appointment.date, a.appointment.timeSlot,
+        a.appointment.notes || '', a.status, a.createdAt
+      ].map(escapeCSV).join(','));
+
+      const csv = BOM + [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `biraj-dental-${new Date().toISOString().slice(0,10).replace(/-/g,'')}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('success', 'Export Complete', `Exported ${filteredData.length} appointments to CSV.`);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       DATA FETCH & REFRESH
+       ═══════════════════════════════════════════════════════ */
+    async function fetchAndRender() {
+      dom.loadingOverlay.classList.add('visible');
+      dom.contactsLoading.classList.add('visible');
+
+      const newAppointments = await fetchAppointments();
+      const newContacts = await fetchContacts();
+
+      // Check for new rows
+      const newIds = new Set(newAppointments.map(a => a.id));
+      const hasNew = newAppointments.some(a => !previousIds.has(a.id));
+
+      allAppointments = newAppointments;
+      allContacts = newContacts;
+      previousIds = newIds;
+
+      applyFilters();
+      renderContacts();
+
+      dom.loadingOverlay.classList.remove('visible');
+      dom.contactsLoading.classList.remove('visible');
+
+      if (hasNew && previousIds.size > 0) {
+        showToast('info', 'New Appointments', 'New appointment data has been loaded.');
+      }
+
+      resetAutoRefresh();
+    }
+
+    function resetAutoRefresh() {
+      countdownSeconds = AUTO_REFRESH_MS / 1000;
+      clearInterval(autoRefreshTimer);
+      clearInterval(countdownTimer);
+
+      countdownTimer = setInterval(() => {
+        countdownSeconds--;
+        if (countdownSeconds <= 0) countdownSeconds = AUTO_REFRESH_MS / 1000;
+        dom.refreshCounter.textContent = `Auto-refresh in ${countdownSeconds}s`;
+      }, 1000);
+
+      autoRefreshTimer = setInterval(fetchAndRender, AUTO_REFRESH_MS);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       EVENT LISTENERS
+       ═══════════════════════════════════════════════════════ */
+    dom.btnRefresh.addEventListener('click', () => {
+      dom.btnRefresh.classList.add('spinning');
+      setTimeout(() => dom.btnRefresh.classList.remove('spinning'), 600);
+      fetchAndRender();
+    });
+
+    dom.searchInput.addEventListener('input', applyFilters);
+    dom.filterStatus.addEventListener('change', applyFilters);
+    dom.filterBranch.addEventListener('change', applyFilters);
+    dom.filterDate.addEventListener('change', applyFilters);
+    dom.btnClearFilters.addEventListener('click', clearAllFilters);
+    dom.btnExportCSV.addEventListener('click', exportCSV);
+
+    // Stat card filters
+    $$('.stat-card').forEach(card => {
+      card.addEventListener('click', () => {
+        activeFilter = card.dataset.filter;
+        applyFilters();
+      });
+    });
+
+    // Sort headers
+    $$('thead th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = th.dataset.sort;
+        if (sortColumn === col) {
+          sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortColumn = col;
+          sortDir = 'asc';
+        }
+        $$('thead th').forEach(t => t.classList.remove('sorted'));
+        th.classList.add('sorted');
+        th.querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '\u25B2' : '\u25BC';
+        sortData();
+        renderTable();
+      });
+    });
+
+    // Pagination
+    dom.paginationControls.addEventListener('click', e => {
+      const btn = e.target.closest('.btn-page');
+      if (!btn || btn.disabled) return;
+      const page = btn.dataset.page;
+      const totalPages = Math.ceil(filteredData.length / PER_PAGE);
+      if (page === 'prev') currentPage = Math.max(1, currentPage - 1);
+      else if (page === 'next') currentPage = Math.min(totalPages, currentPage + 1);
+      else currentPage = parseInt(page, 10);
+      renderTable();
+    });
+
+    // Table actions
+    dom.tableBody.addEventListener('click', e => {
+      const btn = e.target.closest('.btn-action');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+
+      if (action === 'confirm') {
+        updateStatus(id, 'confirmed').then(ok => {
+          if (ok) {
+            btn.closest('tr').classList.add('flash-green');
+            fetchAndRender();
+            showToast('success', 'Confirmed', `Appointment ${id} confirmed.`);
+          }
+        });
+      } else if (action === 'cancel') {
+        updateStatus(id, 'cancelled').then(ok => {
+          if (ok) {
+            btn.closest('tr').classList.add('flash-red');
+            fetchAndRender();
+            showToast('warning', 'Cancelled', `Appointment ${id} cancelled.`);
+          }
+        });
+      } else if (action === 'delete') {
+        deleteTargetId = id;
+        dom.deleteModalId.textContent = id;
+        dom.deleteModal.classList.add('visible');
+      }
+    });
+
+    // Modal
+    dom.btnModalCancel.addEventListener('click', () => {
+      dom.deleteModal.classList.remove('visible');
+      deleteTargetId = null;
+    });
+
+    dom.deleteModal.addEventListener('click', e => {
+      if (e.target === dom.deleteModal) {
+        dom.deleteModal.classList.remove('visible');
+        deleteTargetId = null;
+      }
+    });
+
+    dom.btnModalDelete.addEventListener('click', () => {
+      if (!deleteTargetId) return;
+      const row = dom.tableBody.querySelector(`tr[data-id="${deleteTargetId}"]`);
+      if (row) row.classList.add('fade-out');
+
+      deleteAppointment(deleteTargetId).then(ok => {
+        if (ok) {
+          showToast('success', 'Deleted', `Appointment ${deleteTargetId} deleted.`);
+          setTimeout(() => fetchAndRender(), 400);
+        }
+        dom.deleteModal.classList.remove('visible');
+        deleteTargetId = null;
+      });
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       INIT
+       ═══════════════════════════════════════════════════════ */
+    fetchAndRender();
+  </script>
+</body>
+</html>

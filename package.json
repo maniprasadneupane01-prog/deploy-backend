@@ -1,0 +1,24 @@
+{
+  "name": "biraj-dental-api",
+  "version": "2.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["dental", "api", "biraj", "bhaktapur"],
+  "author": "Biraj Dental",
+  "license": "ISC",
+  "description": "Biraj Dental Hospital API — Bhaktapur's trusted dental care",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.0",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
